@@ -44,12 +44,14 @@ class IndexView(View):
             last_name = request.POST['last_name']
             password = request.POST['password']
 
-            User.objects.create_user(
+            new_user = User(
                 username=username,
                 first_name=first_name,
                 last_name=last_name,
-                password=password,
             )
+            new_user.set_password(password)
+            new_user.save()
+            
             user = authenticate(request, username=username, password=password)
 
             if user is not None:
