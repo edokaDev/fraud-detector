@@ -67,14 +67,38 @@ def logout_view(request):
     return HttpResponseRedirect(reverse('core:landing'))
 
 
-class DashboardView(LoginRequiredMixin, View):
+class DashboardView(View):
+# class DashboardView(LoginRequiredMixin, View):
     login_url = '/'
     redirect_field_name = '/'
 
     def get(self, request):
+        title = 'Dashboard'
+
         context = {
+            'title': title,
         }
-        return HttpResponse("Dashboard")
+        # return HttpResponse("Home Page")
+        return render(request, 'dashboard.html', context)
 
     def post(self, request):
         return HttpResponse("Dashboard: post")
+
+
+class TransactionsView(View):
+# class TransactionsView(LoginRequiredMixin, View):
+    login_url = '/'
+    redirect_field_name = '/'
+
+    def get(self, request):
+        title = 'Transactions'
+
+        context = {
+            'title': title,
+        }
+        # return HttpResponse("Home Page")
+        return render(request, 'transactions.html', context)
+
+    def post(self, request):
+        return HttpResponse("Transactions: post")
+
