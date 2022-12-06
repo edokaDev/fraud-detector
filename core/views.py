@@ -67,8 +67,7 @@ def logout_view(request):
     return HttpResponseRedirect(reverse('core:landing'))
 
 
-class DashboardView(View):
-# class DashboardView(LoginRequiredMixin, View):
+class DashboardView(LoginRequiredMixin, View):
     login_url = '/'
     redirect_field_name = '/'
 
@@ -85,8 +84,7 @@ class DashboardView(View):
         return HttpResponse("Dashboard: post")
 
 
-class TransactionsView(View):
-# class TransactionsView(LoginRequiredMixin, View):
+class TransactionsView(LoginRequiredMixin, View):
     login_url = '/'
     redirect_field_name = '/'
 
@@ -101,4 +99,37 @@ class TransactionsView(View):
 
     def post(self, request):
         return HttpResponse("Transactions: post")
+
+
+class WithdrawalView(LoginRequiredMixin, View):
+    login_url = '/'
+    redirect_field_name = '/'
+
+    def get(self, request):
+        title = 'Withdrawal'
+
+        context = {
+            'title': title,
+        }
+        # return HttpResponse("Home Page")
+        return render(request, 'withdrawal.html', context)
+
+    def post(self, request):
+        return HttpResponse("withdrawal: post")
+
+class DepositView(LoginRequiredMixin, View):
+    login_url = '/'
+    redirect_field_name = '/'
+
+    def get(self, request):
+        title = 'Deposit'
+
+        context = {
+            'title': title,
+        }
+        # return HttpResponse("Home Page")
+        return render(request, 'deposit.html', context)
+
+    def post(self, request):
+        return HttpResponse("Deposit: post")
 

@@ -11,6 +11,7 @@ TXTYPES = (
 class User(AbstractUser):
     tx_pin = models.IntegerField(blank=True, null=True)
     phone = models.CharField(max_length=20, blank=True)
+    balance = models.FloatField(default=0.00)
 
     def __str__(self):
         return f"{self.username}"
