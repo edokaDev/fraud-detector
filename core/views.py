@@ -9,7 +9,7 @@ from django.http import HttpResponse
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth import authenticate, login, logout
 
-from .models import User, Trasaction, TxType
+from .models import User, Transaction
 
 
 # Create your views here.
@@ -33,12 +33,13 @@ class IndexView(View):
             user = authenticate(request, username=username, password=password)
             if user is not None:
                 login(request, user)
-                return redirect('core:landing')
+                return redirect('core:dashboard')
             else:
                 context['error'] = 'Invalid Credentials, try again!'
             return render(request, 'landing.html', context)
 
         if 'register' in request.POST:
+            balance = request.POST['balance']
             username = request.POST['email']
             first_name = request.POST['first_name']
             last_name = request.POST['last_name']
@@ -48,6 +49,7 @@ class IndexView(View):
                 username=username,
                 first_name=first_name,
                 last_name=last_name,
+                balance=balance,
             )
             new_user.set_password(password)
             new_user.save()
@@ -56,7 +58,7 @@ class IndexView(View):
 
             if user is not None:
                 login(request, user)
-            return redirect('core:landing')
+            return redirect('core:dashboard')
 
 
 
@@ -73,16 +75,16 @@ class DashboardView(LoginRequiredMixin, View):
 
     def get(self, request):
         title = 'Dashboard'
-        transactions = Trasaction.objects.filter(user=request.user)
+        transactions = Transaction.objects.filter(user=request.user)
         tx_count = transactions.count()
-        fraud_count = transactions.filter(tx_type__name='fraud').count()
+        fraud_count = transactions.filter(is_fraud=True).count()
 
         context = {
             'title': title,
             'tx_count': tx_count,
             'fraud_count': fraud_count,
+            'transactions': transactions.order_by('-time')[:5],
         }
-        # return HttpResponse("Home Page")
         return render(request, 'dashboard.html', context)
 
     def post(self, request):
@@ -95,11 +97,12 @@ class TransactionsView(LoginRequiredMixin, View):
 
     def get(self, request):
         title = 'Transactions'
+        transactions = Transaction.objects.filter(user=request.user)
 
         context = {
             'title': title,
+            'transactions': transactions.order_by('-time'),
         }
-        # return HttpResponse("Home Page")
         return render(request, 'transactions.html', context)
 
     def post(self, request):
@@ -120,7 +123,19 @@ class WithdrawalView(LoginRequiredMixin, View):
         return render(request, 'withdrawal.html', context)
 
     def post(self, request):
-        return HttpResponse("withdrawal: post")
+        amount = request.POST['amount']
+
+        tx = Transaction()
+        tx.amount = amount
+        tx.user = request.user
+        tx.save()
+
+        # debit user
+        user = request.user
+        user.balance -= float(amount)
+        user.save()
+
+        return HttpResponseRedirect(reverse('core:dashboard'))
 
 class DepositView(LoginRequiredMixin, View):
     login_url = '/'
@@ -132,9 +147,20 @@ class DepositView(LoginRequiredMixin, View):
         context = {
             'title': title,
         }
-        # return HttpResponse("Home Page")
         return render(request, 'deposit.html', context)
 
     def post(self, request):
-        return HttpResponse("Deposit: post")
+        amount = request.POST['amount']
 
+        tx = Transaction()
+        tx.amount = amount
+        tx.user = request.user
+        tx.tx_type = 'Deposit'
+        tx.save()
+
+        # credit user
+        user = request.user
+        user.balance += float(amount)
+        user.save()
+
+        return HttpResponseRedirect(reverse('core:dashboard'))
