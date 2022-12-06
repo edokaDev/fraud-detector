@@ -2,7 +2,7 @@ from django.db import models
 from django.contrib.auth.models import AbstractUser
 
 import random
-import socket
+from utils.verification import IpVerification
 
 # Create your models here.
 
@@ -37,12 +37,7 @@ class Transaction(models.Model):
         ref += f'{random.randrange(100000, 199999)}'
         return ref
     
-    def get_ip(self):
-        hostname = socket.gethostname()
-        ip_address = socket.gethostbyname(hostname)
-        return ip_address
-
     def save(self, *args, **kwargs):
         self.reference_no = self.generate_ref()
-        self.ip_address = self.get_ip()
+        self.ip_address = IpVerification.get_user_ip()
         super(Transaction, self).save(*args, **kwargs)

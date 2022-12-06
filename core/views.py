@@ -1,3 +1,4 @@
+from datetime import datetime
 from django.shortcuts import render, redirect
 from django.http import HttpResponseRedirect
 from django.urls import reverse
@@ -11,8 +12,9 @@ from django.contrib.auth import authenticate, login, logout
 
 from .models import User, Transaction
 
-
-# Create your views here.
+# verifications
+from utils.verification import IpVerification, CodeVerification, TimeVerification
+from utils.face_detection import DetectFace
 
 class IndexView(View):
     def get(self, request):
@@ -123,18 +125,55 @@ class WithdrawalView(LoginRequiredMixin, View):
         return render(request, 'withdrawal.html', context)
 
     def post(self, request):
-        amount = request.POST['amount']
+        ipv = IpVerification()
+        ip_valid = ipv.ip_is_valid()
 
-        tx = Transaction()
-        tx.amount = amount
-        tx.user = request.user
-        tx.save()
+        if ip_valid:
+            dface = DetectFace()
+            face_valid = dface.face_valid()
 
-        # debit user
-        user = request.user
-        user.balance -= float(amount)
-        user.save()
+            if face_valid:
+                amount = request.POST['amount']
 
+                if float(amount) <= request.user.balance:
+                    # save the transaction
+                    tx = Transaction()
+                    tx.amount = amount
+                    tx.user = request.user
+
+                    user_max = Transaction.objects.filter(user=request.user).order_by('-amount').first()
+                    
+                    if float(amount) <= user_max.amount and TimeVerification.time_is_valid(datetime.now()):
+                        # appoved
+                        # debit user
+                        user = request.user
+                        user.balance -= float(amount)
+                        user.save()
+                        tx.save()
+                        return HttpResponseRedirect(reverse('core:dashboard'))
+                    
+                    # Transaction suspicious
+                    # send code
+                    code = CodeVerification()
+                    code.send_code(request.user.phone)
+                    
+                    if code.validate_code('code'):
+                        # appoved
+                        # debit user
+                        user = request.user
+                        user.balance -= float(amount)
+                        user.save()
+                        tx.save()
+                        return HttpResponseRedirect(reverse('core:dashboard'))
+
+                    # Code not correct
+                    tx.is_fraud = True
+                    tx.save()
+
+        # Error in Transaction
+            # amount > user's balance
+            # or face is not valid
+            # of user ip flags
         return HttpResponseRedirect(reverse('core:dashboard'))
 
 class DepositView(LoginRequiredMixin, View):
