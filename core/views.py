@@ -9,7 +9,7 @@ from django.http import HttpResponse
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth import authenticate, login, logout
 
-from .models import User
+from .models import User, Trasaction, TxType
 
 
 # Create your views here.
@@ -73,9 +73,14 @@ class DashboardView(LoginRequiredMixin, View):
 
     def get(self, request):
         title = 'Dashboard'
+        transactions = Trasaction.objects.filter(user=request.user)
+        tx_count = transactions.count()
+        fraud_count = transactions.filter(tx_type__name='fraud').count()
 
         context = {
             'title': title,
+            'tx_count': tx_count,
+            'fraud_count': fraud_count,
         }
         # return HttpResponse("Home Page")
         return render(request, 'dashboard.html', context)

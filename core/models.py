@@ -20,6 +20,9 @@ class User(AbstractUser):
 class TxType(models.Model):
     name = models.CharField(max_length=20, blank=True)
 
+    def __str__(self):
+        return self.name
+
 
 class Trasaction(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -28,7 +31,7 @@ class Trasaction(models.Model):
     ip_address = models.IntegerField()
     time = models.DateTimeField(auto_now=True)
     reference_no = models.CharField(max_length=20)
-    type = models.ForeignKey(TxType, on_delete=models.RESTRICT)
+    tx_type = models.ForeignKey(TxType, on_delete=models.RESTRICT)
     is_fraud = models.BooleanField(default=False)
 
     def __str__(self) -> str:
