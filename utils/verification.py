@@ -1,3 +1,4 @@
+from datetime import datetime, timedelta
 # sms
 from twilio.rest import Client
 from dotenv import load_dotenv
@@ -32,22 +33,27 @@ class IpVerification:
 
 class TimeVerification:
     @staticmethod
-    def time_is_valid(time):
+    def time_is_valid(t):
+        supicious_hrs = [i for i in range(22, 24)] + [i for i in range(0, 5)]
+        # [22, 23, 0, 1, 2, 3, 4]
+        if t.hour in supicious_hrs:
+            return False
         return True
 
 
 
 class CodeVerification:
     def __init__(self):
-        self.code = None
+        self.code = self.generate_code()
     
-    def generate_code(self):
+    @staticmethod
+    def generate_code():
         code = ''
         for i in range(6):
             code += chr(random.randrange(ord('A'), ord('Z')))
-        self.code = code
         return code
-
+        
+    @staticmethod
     def send_code(self, number):
         # account_sid = os.getenv('TWILIO_ACCOUNT_SID')
         # auth_token = os.getenv('TWILIO_AUTH_TOKEN')

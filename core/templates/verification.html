@@ -1,0 +1,79 @@
+{% extends "includes/base-dash.html" %}
+
+{% block title %} Transactions {% endblock %} 
+
+<!-- Specific Page CSS goes HERE  -->
+{% block stylesheets %}{% endblock stylesheets %}
+
+{% block content %}
+
+
+  <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center py-4">
+      <div class="d-block mb-4 mb-md-0">
+          <h2 class="h4">Withdrawal Verification</h2>
+      </div>
+  </div>
+  <div class="row">
+    <div class="col-12 col-xl-8">
+        <div class="card border-0 shadow">
+            <div class="card-body">
+                {% if approved %}
+                    <div class="text-center">
+                        <h3>Transaction Approved!!!</h3>
+                        <a href="{% url 'core:dashboard' %}" class="btn btn-primary">Go to Dashboard</a>
+                    </div>
+                {% elif blocked %}
+                    <div class="text-center">
+                        <h3>{{ error }}</h3>
+                        <a href="{% url 'core:dashboard' %}" class="btn btn-primary">Go to Dashboard</a>
+                    </div>
+                    
+                {% elif code_sent %}
+                    <form method="post">
+                    {% csrf_token %}
+                        <div class="form-group mb-4">
+                            <label for="email">Enter Code </label>
+                            <div class="input-group">
+                                <input class="form-control" placeholder="code" name="sms_code" autofocus>
+                            </div>  
+                        </div>
+                        <div class="d-grid">
+                            <button type="submit" name="code" class="btn btn-gray-800">Verify</button>
+                        </div>
+                    </form>
+                    
+                {% elif send_code %}
+                    <form method="post">
+                    {% csrf_token %}
+                        <div class="form-group mb-4">
+                            <label for="email">Amount</label>
+                            <div class="input-group">
+                                <input class="form-control" value="{{ amount }}" name="amount" autofocus disabled>
+                            </div>  
+                        </div>
+                        <div class="form-group mb-4">
+                            <label for="email">Recieve SMS Code</label>
+                            <div class="input-group">
+                                <input class="form-control" value="+234{{ request.user.phone }}" name="phone_number" autofocus disabled>
+                            </div>  
+                        </div>
+                        <div class="d-grid">
+                            <button type="submit" name="send_sms" class="btn btn-gray-800">Next</button>
+                        </div>
+                    </form>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    <div class="col-12 col-xl-4">
+        <div class="card border-0 shadow">
+            <div class="card-body">
+                <h4>Camera</h4>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}
+
+<!-- Specific Page JS goes HERE  -->
+{% block javascripts %}{% endblock javascripts %}

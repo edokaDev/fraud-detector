@@ -1,0 +1,148 @@
+{% extends "includes/base-dash.html" %}
+
+{% block title %} Dashboard {% endblock %} 
+
+<!-- Specific Page CSS goes HERE  -->
+{% block stylesheets %}{% endblock stylesheets %}
+
+{% block content %}
+
+<!-- New ATMCard Modal -->
+<div class="modal fade" id="modal-form-addcard" tabindex="-1" role="dialog" aria-labelledby="modal-form-addcard" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-body p-0">
+                <div class="card p-3 p-lg-4">
+                    <button type="button" class="btn-close ms-auto" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <div class="text-center text-md-center mb-4 mt-md-0">
+                        <h1 class="mb-0 h4">New ATM Card</h1>
+                    </div>
+                    <form method="post" class="mt-4">
+                        {% csrf_token %}
+                        <!-- Form -->
+                        <div class="mb-4">
+                            <label class="my-1 me-2" for="type">Account</label>
+                            <select class="form-select" name="account_id" id="country" aria-label="Default select example" required>
+                                <!-- <option selected>Select Account</option> -->
+                                {% for acc in user_accounts %}
+                                <option value={{ acc.id }}>{{ acc }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="form-group mb-4">
+                            <label for="email">Card Pin</label>
+                            <div class="input-group">
+                                <input type="number" class="form-control" placeholder="4 digit pin" name="pin" autofocus required>
+                            </div>  
+                        </div>
+                        <div class="d-grid">
+                            <button type="submit" name="new_atmcard" class="btn btn-gray-800">Create ATM Card</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- End of ATMCard Modal -->
+
+<!-- Card Pin Modal -->
+<div class="modal fade" id="modal-form-change-pin" tabindex="-1" role="dialog" aria-labelledby="modal-form-change-pin" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-body p-0">
+                <div class="card p-3 p-lg-4">
+                    <button type="button" class="btn-close ms-auto" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <div class="text-center text-md-center mb-4 mt-md-0">
+                        <h1 class="mb-0 h4">Update Pin</h1>
+                    </div>
+                    <form method="post" class="mt-4">
+                        {% csrf_token %}
+                        <!-- Form -->
+                        <div class="form-group mb-4">
+                            <label for="email">Current Pin</label>
+                            <div class="input-group">
+                                <input type="number" class="form-control" placeholder="4 digit pin" name="current_pin" autofocus required>
+                            </div>  
+                        </div>
+                        <div class="form-group mb-4">
+                            <label for="email">New Pin</label>
+                            <div class="input-group">
+                                <input type="number" class="form-control" placeholder="4 digit pin" name="new_pin_1" autofocus required>
+                            </div>  
+                        </div>
+                        <div class="form-group mb-4">
+                            <label for="email">Re-enter New Pin</label>
+                            <div class="input-group">
+                                <input type="number" class="form-control" placeholder="4 digit pin" name="new_pin_2" autofocus required>
+                            </div>  
+                        </div>
+                        <div class="d-grid">
+                            <button type="submit" name="new_atmcard" class="btn btn-gray-800">Change</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- End of card pin Modal -->
+
+
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center py-4">
+        <div class="d-block mb-4 mb-md-0">
+            <h2 class="h4">ATM Cards</h2>
+            <p class="mb-3">{{ card_count }} Card(s)</p>
+        </div>
+        <div class="btn-toolbar mb-2 mb-md-0">
+            <button type="button" class="btn btn-outline-primary btn-sm me-2" data-bs-toggle="modal" data-bs-target="#modal-form-addcard">Add</button>
+        </div>
+    </div>
+    <div class="row">
+        {% for card in cards %}
+        <div class="col-12 col-sm-12 col-xl-6 mb-6">
+            <div class="card border-0 shadow">
+                <div class="card-body">
+                    <div class="row d-block d-xl-flex align-items-center">
+                        <div class="col-12 col-xl-5 text-xl-center mb-3 mb-xl-0 d-flex align-items-center justify-content-xl-center">
+                            <div class="icon-shape icon-shape-primary rounded me-4 me-sm-0">
+                                <svg class="icon" fill="currentColor" viewBox="0 0 20 20"><path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3zM6 8a2 2 0 11-4 0 2 2 0 014 0zM16 18v-3a5.972 5.972 0 00-.75-2.906A3.005 3.005 0 0119 15v3h-3zM4.75 12.094A5.973 5.973 0 004 15v3H1v-3a3 3 0 013.75-2.906z"></path></svg>
+                            </div>
+                            <div class="d-sm-none">
+                                <h2 class="h5">{{ card.type }}</h2>
+                                <h3 class="fw-extrabold mb-1">N{{ card.account.balance }}</h3>
+                                <p class="mb-0"><small>Account: <b>{{ card.account }}</b></small></p>
+                                <p class="mb-0"><small>Issued Date: <b>{{ card.issued_date }}</b></small></p>
+                                <p class="mb-0"><small>Expiry Date: <b>{{ card.expiry_date }}</b></small></p>
+                                <p class="mb-0"><small>Status: <b>{% if card.is_active %}Active{% else %}Blocked{% endif %}</b></small></p>
+                                <div class="d-flex">
+                                    <button type="button" class="btn btn-outline-primary btn-sm me-2" data-bs-toggle="modal" data-bs-target="#modal-form-change-pin">Change Pin</button>
+                                    <button class="btn btn-outline-primary me-2 btn-sm">Block</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-12 col-xl-7 px-xl-0">
+                            <div class="d-none d-sm-block">
+                                <h2 class="h6 text-gray-400 mb-0">{{ card.type }}</h2>
+                                <h3 class="fw-extrabold mb-4">N{{ card.account.balance }}</h3>
+                                <p class="mb-0"><small>Account: <b>{{ card.account }}</b></small></p>
+                                <p class="mb-0"><small>Issued Date: <b>{{ card.issued_date }}</b></small></p>
+                                <p class="mb-0"><small>Expiry Date: <b>{{ card.expiry_date }}</b></small></p>
+                                <p class="mb-0"><small>Status: <b>{% if card.is_active %}Active{% else %}Blocked{% endif %}</b></small></p>
+                                <div class="d-flex">
+                                    <button type="button" class="btn btn-outline-primary btn-sm me-2" data-bs-toggle="modal" data-bs-target="#modal-form-change-pin">Change Pin</button>
+                                    <button class="btn btn-outline-primary me-2 btn-sm">Block</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+{% endblock content %}
+
+<!-- Specific Page JS goes HERE  -->
+{% block javascripts %}{% endblock javascripts %}

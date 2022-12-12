@@ -7,7 +7,9 @@
 
 {% block content %}
 
-
+{% if error %}
+<h4 class="text-center">{{ error }}</h4>
+{% endif %}
   <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center py-4">
       <div class="d-block mb-4 mb-md-0">
           <h2 class="h4">Withdrawal</h2>
@@ -19,10 +21,31 @@
             <div class="card-body">
                 <form method="post">
                 {% csrf_token %}
-                    <label for="email">Enter Amount</label>
-                    <input type="number" class="form-control" id="email" aria-describedby="emailHelp" name="amount">
-                    <br>
-                    <button class="btn btn-lg btn-primary" type="submit">submit</button>
+                    <div class="mb-4">
+                        <label class="my-1 me-2" for="type">Card</label>
+                        <select class="form-select" name="card_id" id="country" aria-label="Default select example" required>
+                            <!-- <option selected>Select Card</option> -->
+                            {% for card in cards %}
+                            <option value={{ card.id }}>{{ card }} >>> {{ card.account.balance }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group mb-4">
+                        <label for="email">Enter Amount</label>
+                        <div class="input-group">
+                            <input type="number" class="form-control" placeholder="Amount" name="amount" autofocus required>
+                        </div>  
+                    </div>
+                    <div class="form-group mb-4">
+                        <label for="email">Card Pin</label>
+                        <div class="input-group">
+                            <input type="password" class="form-control" placeholder="4 digit pin" name="pin" autofocus required>
+                        </div>  
+                    </div>
+                    <input type="text" hidden name="withdraw_next">
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-gray-800">Next</button>
+                    </div>
                 </form>
             </div>
         </div>

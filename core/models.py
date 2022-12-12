@@ -2,7 +2,6 @@ from django.db import models
 from django.contrib.auth.models import AbstractUser
 
 import random
-from utils.verification import IpVerification
 
 from datetime import timedelta, date
 
@@ -12,6 +11,12 @@ TXTYPES = (
     ("Deposit", 'Deposit'),
     ('Withdrawal', 'Withdrawal'),
 )
+CARDTYPES = (
+    ("Verve", 'Verve'),
+    ('Visa', 'Visa'),
+    ('MasterCard', 'MasterCard'),
+)
+
 
 class User(AbstractUser):
     phone = models.CharField(max_length=20, blank=True)
@@ -28,17 +33,32 @@ class Account(models.Model):
     def __str__(self):
         return self.account_no
 
+    def generate_account_no(self):
+        num = f'{random.randrange(1000000000, 1999999999)}'
+
+        if len(Account.objects.filter(account_no=num)) > 0:
+            return self.generate_card_no()
+        
+        return num
+
+    def save(self, *args, **kwargs):
+        # set account number
+        self.account_no = self.generate_account_no()
+        super(Account, self).save(*args, **kwargs)
+        
+
 
 class AtmCard(models.Model):
-    pin = models.IntegerField()
+    pin = models.CharField(max_length=4)
     account = models.ForeignKey(Account, on_delete=models.CASCADE)
     issued_date = models.DateField(auto_now=True)
     expiry_date = models.DateField()
     is_active = models.BooleanField(default=True)
     number = models.IntegerField()
+    type = models.CharField(max_length=10, choices=CARDTYPES, default='MasterCard')
 
     def generate_card_no(self):
-        num = f'{random.randrange(5000000000000000, 5999999999000000)}'
+        num = f'{random.randrange(5000000000000000, 5999999999999999)}'
 
         if len(AtmCard.objects.filter(number=num)) > 0:
             return self.generate_card_no()
@@ -51,20 +71,18 @@ class AtmCard(models.Model):
         # set expiry date
         self.expiry_date = date.today() + timedelta(days=(365 * 3))
         super(AtmCard, self).save(*args, **kwargs)
-        pass
     
     def __str__(self):
-        return f"{self.number}"
+        return f"{self.type}"
 
 
 class Transaction(models.Model):
     card = models.ForeignKey(AtmCard, on_delete=models.CASCADE)
     amount = models.IntegerField()
-    ip_address = models.CharField(max_length=50, blank=True, null=True)
     time = models.DateTimeField(auto_now=True)
     reference_no = models.CharField(max_length=20)
     tx_type = models.CharField(max_length=10, choices=TXTYPES, default='Withdrawal')
-    is_fraud = models.BooleanField(default=False)
+    is_approved = models.BooleanField(default=False)
 
     def __str__(self) -> str:
         return self.reference_no
@@ -76,6 +94,13 @@ class Transaction(models.Model):
     
     def save(self, *args, **kwargs):
         self.reference_no = self.generate_ref()
-        self.ip_address = IpVerification.get_user_ip()
         super(Transaction, self).save(*args, **kwargs)
 
+
+class VerificationCode(models.Model):
+    code = models.CharField(max_length=10)
+    transaction = models.ForeignKey(Transaction, on_delete=models.CASCADE)
+
+
+    def __str__(self) -> str:
+        return self.code
