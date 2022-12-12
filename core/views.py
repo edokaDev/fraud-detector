@@ -319,7 +319,7 @@ class CardsView(LoginRequiredMixin, View):
 
     def get(self, request):
         title = 'ATM Cards'
-
+        user_accounts = Account.objects.filter(user=request.user)
         user_cards = AtmCard.objects.filter(account__user=request.user)
         card_count = user_cards.count()
         context = {
@@ -327,9 +327,15 @@ class CardsView(LoginRequiredMixin, View):
             'segment': ['cards'],
             'cards': user_cards,
             'card_count': card_count,
+            'card_types': ['Verve', 'MasterCard', 'Visa'],
+            'user_accounts': user_accounts,
         }
         return render(request, 'atm_cards.html', context)
     
     def post(self, request):
-        # new / block
-        pass
+        atm = AtmCard()
+        atm.type = request.POST['type']
+        atm.pin = request.POST['pin']
+        atm.account_id = request.POST['account_id']
+        atm.save()
+        return HttpResponseRedirect(reverse('core:cards'))
