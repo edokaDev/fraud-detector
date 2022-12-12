@@ -48,7 +48,15 @@
                   <span class="sidebar-text">Dashboard</span>
                 </a>
               </li>
-              <li class="nav-item {% if 'tables-bootstrap-' in segment %} active {% endif %}">
+              <li class="nav-item {% if 'cards' in segment %} active {% endif %}">
+                <a href="{% url 'core:cards' %}" class="nav-link">
+                  <span class="sidebar-icon">
+                    <svg class="icon icon-xs me-2" fill="currentColor" viewBox="0 0 20 20"><path d="M2 10a8 8 0 018-8v8h8a8 8 0 11-16 0z"></path><path d="M12 2.252A8.014 8.014 0 0117.748 8H12V2.252z"></path></svg>
+                  </span> 
+                  <span class="sidebar-text">ATM Cards</span>
+                </a>
+              </li>
+              <li class="nav-item {% if 'transactions' in segment %} active {% endif %}">
                 <span
                   class="nav-link  collapsed  d-flex justify-content-between align-items-center"
                   data-bs-toggle="collapse" data-bs-target="#submenu-app">
@@ -65,19 +73,19 @@
                 <div class="multi-level collapse {% if 'tables-bootstrap-' in segment %} show {% endif %}"
                   role="list" id="submenu-app" aria-expanded="false">
                   <ul class="flex-column nav">
-                    <li class="nav-item {% if 'bootstrap-tables' in segment %} active {% endif %}">
+                    <li class="nav-item {% if 'all-transactions' in segment %} active {% endif %}">
                         <a class="nav-link" href="{% url 'core:transactions' %}">
                           <span class="sidebar-text">All Transactions</span>
                         </a>
                       </li>
-                      <li class="nav-item {% if 'bootstrap-tables' in segment %} active {% endif %}">
+                      <li class="nav-item {% if 'withdraw' in segment %} active {% endif %}">
                         <a class="nav-link" href="{% url 'core:withdraw' %}">
-                          <span class="sidebar-text">Withdraw Cash</span>
+                          <span class="sidebar-text">Withdrawal</span>
                         </a>
                       </li>
-                      <li class="nav-item {% if 'bootstrap-tables' in segment %} active {% endif %}">
+                      <li class="nav-item {% if 'deposit' in segment %} active {% endif %}">
                         <a class="nav-link" href="{% url 'core:deposit' %}">
-                          <span class="sidebar-text">Deposit Cash</span>
+                          <span class="sidebar-text">Deposit</span>
                         </a>
                       </li>
                         </ul>
