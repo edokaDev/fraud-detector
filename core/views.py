@@ -74,7 +74,7 @@ class DashboardView(LoginRequiredMixin, View):
     redirect_field_name = '/'
 
     def get(self, request):
-        title = 'Dashboard'
+        title = 'Dashboard New'
         transactions = Transaction.objects.filter(card__account__user=request.user, is_approved=True)
         user_cards = AtmCard.objects.filter(account__user=request.user)
         card_count = user_cards.count()
@@ -117,7 +117,7 @@ class TransactionsView(LoginRequiredMixin, View):
 
     def get(self, request):
         title = 'Transactions'
-        transactions = Transaction.objects.filter(card__account__user=request.user)
+        transactions = Transaction.objects.filter(card__account__user=request.user, is_approved=True)
 
         context = {
             'title': title,
@@ -305,6 +305,7 @@ class DepositView(LoginRequiredMixin, View):
         tx.amount = amount
         tx.card = card
         tx.tx_type = 'Deposit'
+        tx.is_approved = True
         tx.save()
 
         # credit user
